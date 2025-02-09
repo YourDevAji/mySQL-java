@@ -321,7 +321,9 @@ class Select extends DatabaseQuery {
     @Override
     public String build() {
         String distinctPart = distinct ? "DISTINCT " : "";
-        String colPart = columns.isEmpty() ? "*" : columns.stream().map(Column::getFullName).collect(Collectors.joining(", "));
+        String colPart = columns.isEmpty() ? "*" : columns.stream()
+                .map(col -> col.getAlias() != null ? col.getFullName() + " AS " + col.getAlias() : col.getFullName())
+                .collect(Collectors.joining(", "));
         String tablePart = table.getName() + (tableAlias != null ? " AS " + tableAlias : "");
         String joinPart = joins.isEmpty() ? "" : joins.stream().map(Join::toSQL).collect(Collectors.joining(" "));
         String wherePart = conditions.isEmpty() ? "" : " WHERE " + conditions.stream().map(Condition::toSQL).collect(Collectors.joining(" AND "));
@@ -412,4 +414,5 @@ class Column {
     public Column(String parent, String name, String alias) { this.parent = parent; this.name = name; this.alias = alias; }
     public String getFullName() { return (parent != null ? parent + "." : "") + name; }
     public String getTableName() { return parent; }
+    public String getAlias() { return alias; }
 }
